@@ -6,15 +6,11 @@ import frc.robot.subsystems.Drivetrain;
 
 public class TankDrive extends CommandBase {
     private final Drivetrain drivetrain;
-
-    private boolean invertDriveWasPressed = false;
-    private boolean inverted;
-    private double left, right;
-    private int invert_driving = 1;
+    private double left;
+    private double right;
 
     public TankDrive(Drivetrain drivetrain, double left, double right, boolean inverted) {
         this.drivetrain = drivetrain;
-        this.inverted = inverted;
         this.left = left;
         this.right = right;
         // each subsystem used by the command must be passed into the addRequirements() method (which takes a vararg of Subsystem)
@@ -22,9 +18,7 @@ public class TankDrive extends CommandBase {
     }
 
     @Override
-    public void initialize() {
-        invertDriveWasPressed = inverted;
-    }
+    public void initialize() {}
 
     @Override
     public void execute() {
@@ -37,7 +31,7 @@ public class TankDrive extends CommandBase {
 //            invertDriveWasPressed = false;
 //        }
 //        drivetrain.setCurvedTeleopSpeed(invert_driving * left, invert_driving * right);
-        drivetrain.setCurvedTeleopSpeed(left, right);
+        drivetrain.tankDrive(left, right);
     }
 
     @Override

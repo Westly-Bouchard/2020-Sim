@@ -21,13 +21,14 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final Drivetrain m_drivetrain = new Drivetrain();
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
-  Joystick m_driverController = new Joystick(0);
+  XboxController driveController = new XboxController(0);
+
   public RobotContainer() {
     // Configure the button bindings
     configureButtonBindings();
 
 //    m_drivetrain.setDefaultCommand(new TankDrive(m_drivetrain, m_driverController.getRawAxis(0), m_driverController.getRawAxis(5), m_driverController.getRawButton(5)));
-    m_drivetrain.setDefaultCommand(new TankDrive(m_drivetrain, 1, 1, false));
+//    m_drivetrain.setDefaultCommand(new TankDrive(m_drivetrain, () -> driveController.getRawAxis(1), () -> driveController.getRawAxis(5), false));
   }
 
   /**
