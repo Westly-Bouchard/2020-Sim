@@ -20,7 +20,6 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.util.GyroSim;
 import frc.robot.Constants;
 
 /* Project that I'm working from:
@@ -43,7 +42,6 @@ public class Drivetrain extends SubsystemBase {
   private final DifferentialDriveOdometry m_odometry;
 
   private DifferentialDrivetrainSim m_driveSim;
-  private GyroSim m_gyroSim;
   private Field2d m_field;
   private final TalonSRXSimCollection m_leftSim = new TalonSRXSimCollection(m_front_left);
   private final TalonSRXSimCollection m_rightSim = new TalonSRXSimCollection(m_front_right);
@@ -55,8 +53,6 @@ public class Drivetrain extends SubsystemBase {
     m_odometry = new DifferentialDriveOdometry(Rotation2d.fromDegrees(getHeading()));
 
     if (RobotBase.isSimulation()) {
-      m_gyroSim = new GyroSim("NavX");
-
       m_driveSim = new DifferentialDrivetrainSim(
               DCMotor.getCIM(2),
               Constants.kDrivetrainGearing,
