@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.kauailabs.navx.frc.AHRS;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
@@ -45,6 +46,8 @@ public class Drivetrain extends SubsystemBase {
 
   private DifferentialDrivetrainSim m_driveSim;
   private GyroSim m_gyroSim;
+  private Encoder m_leftEncoder;
+  private Encoder m_rightEncoder;
   private EncoderSim m_leftSim;
   private EncoderSim m_rightSim;
   private Field2d m_field;
@@ -53,15 +56,21 @@ public class Drivetrain extends SubsystemBase {
     m_drive.setRightSideInverted(false);
 
     if (RobotBase.isSimulation()) {
-      m_leftSim = EncoderSim.createForIndex(1); //Arbitrary index (I have to figure out what to actually put here)
-      m_rightSim = EncoderSim.createForIndex(2); //Arbitrary index (I have to figure out what to actually put here)
+      m_leftEncoder = new Encoder(0, 1);
+      m_rightEncoder = new Encoder(2, 3);
+      m_leftSim = new EncoderSim(m_leftEncoder);
+      m_rightSim = new EncoderSim(m_rightEncoder);
+
+      m_leftEncoder.setDistancePerPulse(4.601942364E-4);
+      m_rightEncoder.setDistancePerPulse(4.601942364E-4);
+//3.897449094E-5 old distance per pulse
       m_gyroSim = new GyroSim("NavX");
 
       m_driveSim = new DifferentialDrivetrainSim(
               DCMotor.getFalcon500(2),
               Constants.kDrivetrainGearing,
-              Constants.kMomentOfInertia,
-              Constants.kRobotMass,
+              Constants.kMomentOfInertia + 3,
+              Constants.kRobotMass - 50,
               Units.inchesToMeters(Constants.kWheelDiameter),
               Constants.kTrackWidth,
               null
@@ -76,25 +85,8 @@ public class Drivetrain extends SubsystemBase {
     }
   }
 
-  public void setCurvedTeleopSpeed(double left, double right) {
-    double left_speed, right_speed;
-    if (left == 0) {
-      left_speed = 0;
-    } else if (abs(left) < Constants.kDrivetrainTeleOpFrictionDeadband) {
-      left_speed = (abs(left) / left) * Constants.kDrivetrainTeleOpFrictionAmount * sqrt(abs(left) / Constants.kDrivetrainTeleOpFrictionDeadband);
-    } else {
-      left_speed = (abs(left) / left) * ((abs(left) + Constants.kDrivetrainTeleOpFrictionAmount * (1 - abs(left)) - Constants.kDrivetrainTeleOpFrictionDeadband) / (1 - Constants.kDrivetrainTeleOpFrictionDeadband));
-    }
-
-    if (right == 0) {
-      right_speed = 0;
-    } else if (abs(right) < Constants.kDrivetrainTeleOpFrictionDeadband) {
-      right_speed = (abs(right) / right) * Constants.kDrivetrainTeleOpFrictionAmount * sqrt(abs(right) / Constants.kDrivetrainTeleOpFrictionDeadband);
-    } else {
-      right_speed = (abs(right) / right) * ((abs(right) + Constants.kDrivetrainTeleOpFrictionAmount * (1 - abs(right)) - Constants.kDrivetrainTeleOpFrictionDeadband) / (1 - Constants.kDrivetrainTeleOpFrictionDeadband));
-    }
-
-    m_drive.tankDrive(left_speed, right_speed);
+  public void tankDrive(double left, double right) {
+    m_drive.tankDrive(left, right);
   }
 
   @Override
@@ -116,5 +108,6 @@ public class Drivetrain extends SubsystemBase {
     m_rightSim.setDistance(m_driveSim.getRightPositionMeters());
     m_rightSim.setRate(m_driveSim.getRightVelocityMetersPerSecond());
     m_gyroSim.setHeading(m_driveSim.getHeading());
+    SmartDashboard.putNumber("Avg, Speed", (m_driveSim.getLeftVelocityMetersPerSecond() + m_driveSim.getRightVelocityMetersPerSecond() / 2));
   }
 }

@@ -32,7 +32,7 @@ public class RobotContainer {
     m_drivetrain.setDefaultCommand(
             new RunCommand(
                     () ->
-                            m_drivetrain.tankDrive(driveController.getRawAxis(1), driveController.getRawAxis(5)),
+                            m_drivetrain.tankDrive(-driveController.getRawAxis(1), -driveController.getRawAxis(5)),
                     m_drivetrain
             )
     );
