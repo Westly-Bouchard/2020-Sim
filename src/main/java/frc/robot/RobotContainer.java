@@ -8,6 +8,7 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import frc.robot.commands.looped.TankDrive;
 import frc.robot.subsystems.Drivetrain;
 
@@ -27,8 +28,14 @@ public class RobotContainer {
     // Configure the button bindings
     configureButtonBindings();
 
-//    m_drivetrain.setDefaultCommand(new TankDrive(m_drivetrain, m_driverController.getRawAxis(0), m_driverController.getRawAxis(5), m_driverController.getRawButton(5)));
 //    m_drivetrain.setDefaultCommand(new TankDrive(m_drivetrain, () -> driveController.getRawAxis(1), () -> driveController.getRawAxis(5), false));
+    m_drivetrain.setDefaultCommand(
+            new RunCommand(
+                    () ->
+                            m_drivetrain.tankDrive(driveController.getRawAxis(1), driveController.getRawAxis(5)),
+                    m_drivetrain
+            )
+    );
   }
 
   /**

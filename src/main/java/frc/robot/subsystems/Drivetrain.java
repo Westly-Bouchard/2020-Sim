@@ -69,7 +69,7 @@ public class Drivetrain extends SubsystemBase {
 
   @Override
   public void periodic() {
-    m_odometry.update(Rotation2d.fromDegrees(getHeading()), ctreUnitsToDistanceMeters(m_front_left.getSelectedSensorPosition()), ctreUnitsToDistanceMeters(m_front_right.getSelectedSensorPosition()));
+    m_odometry.update(Rotation2d.fromDegrees(getHeading()), m_front_left.getSelectedSensorPosition(), m_front_right.getSelectedSensorPosition());
     m_field.setRobotPose(m_odometry.getPoseMeters());
   }
 
@@ -77,10 +77,10 @@ public class Drivetrain extends SubsystemBase {
   public void simulationPeriodic() {
     m_driveSim.setInputs(m_front_left.getMotorOutputVoltage(), m_front_right.getMotorOutputVoltage());
     m_driveSim.update(Constants.kLoopTime);
-    m_leftSim.setQuadratureRawPosition(distanceToCTRENativeUnits(m_driveSim.getLeftPositionMeters()));
-    m_leftSim.setQuadratureVelocity(velocityToCTRENativeUnits(m_driveSim.getLeftVelocityMetersPerSecond()));
-    m_rightSim.setQuadratureRawPosition(distanceToCTRENativeUnits(m_driveSim.getRightPositionMeters()));
-    m_rightSim.setQuadratureVelocity(velocityToCTRENativeUnits(m_driveSim.getRightVelocityMetersPerSecond()));
+    m_leftSim.setQuadratureRawPosition((int)distanceToCTRENativeUnits(m_driveSim.getLeftPositionMeters()));
+    m_leftSim.setQuadratureVelocity((int)velocityToCTRENativeUnits(m_driveSim.getLeftVelocityMetersPerSecond()));
+    m_rightSim.setQuadratureRawPosition((int)distanceToCTRENativeUnits(m_driveSim.getRightPositionMeters()));
+    m_rightSim.setQuadratureVelocity((int)velocityToCTRENativeUnits(m_driveSim.getRightVelocityMetersPerSecond()));
     int dev = SimDeviceDataJNI.getSimDeviceHandle("navX-Sensor[0]");
     SimDouble angle = new SimDouble(SimDeviceDataJNI.getSimValueHandle(dev, "Yaw"));
     angle.set(m_driveSim.getHeading().getDegrees());
@@ -101,18 +101,18 @@ public class Drivetrain extends SubsystemBase {
     return positionMeters;
   }
 
-  public int distanceToCTRENativeUnits(double positionMeters) {
+  public double distanceToCTRENativeUnits(double positionMeters) {
     double wheelRotations = positionMeters / (Math.PI * Constants.kWheelDiameter);
     double motorRotations = wheelRotations * Constants.kDrivetrainGearing;
-    int sensorCounts = (int) (motorRotations * 2048); // Encoder CPR
+    double sensorCounts = (motorRotations * 2048); // Encoder CPR
     return sensorCounts;
   }
 
-  public int velocityToCTRENativeUnits(double velocityMetersPerSecond) {
+  public double velocityToCTRENativeUnits(double velocityMetersPerSecond) {
     double wheelRotationsPerSecond = velocityMetersPerSecond / (Math.PI * Constants.kWheelDiameter);
     double motorRotationsPerSecond = wheelRotationsPerSecond * Constants.kDrivetrainGearing;
     double motorRotationsPer100ms = motorRotationsPerSecond / 10;
-    int sensorCountsPer100ms = (int) (motorRotationsPer100ms * 2048); //Encoder CPR
+    double sensorCountsPer100ms = (motorRotationsPer100ms * 2048); //Encoder CPR
     return sensorCountsPer100ms;
   }
 }
