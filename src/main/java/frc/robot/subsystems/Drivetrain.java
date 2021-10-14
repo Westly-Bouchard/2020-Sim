@@ -8,8 +8,6 @@ import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.TalonSRXSimCollection;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.kauailabs.navx.frc.AHRS;
-import edu.wpi.first.hal.SimDouble;
-import edu.wpi.first.hal.simulation.SimDeviceDataJNI;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
@@ -22,6 +20,7 @@ import edu.wpi.first.wpilibj.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.util.GyroSim;
 
 /* Project that I'm working from:
   https://github.com/frc2377/CTRE-Sim/blob/master/src/main/java/frc/robot/subsystems/DriveSubsystem.java#L98
@@ -44,8 +43,9 @@ public class Drivetrain extends SubsystemBase {
 
   private DifferentialDrivetrainSim m_driveSim;
   private Field2d m_field;
-  private final TalonSRXSimCollection m_leftSim = new TalonSRXSimCollection(m_front_left);
-  private final TalonSRXSimCollection m_rightSim = new TalonSRXSimCollection(m_front_right);
+  private final TalonSRXSimCollection m_leftSim = m_front_left.getSimCollection();
+  private final TalonSRXSimCollection m_rightSim = m_front_right.getSimCollection();
+  private final GyroSim simGyro = new GyroSim("NavX");
 
 
   /** Creates a new Drivetrain. */
@@ -76,12 +76,13 @@ public class Drivetrain extends SubsystemBase {
       );
       m_field = new Field2d();
       SmartDashboard.putData("Field", m_field);
+
     }
   }
 
   @Override
   public void periodic() {
-    m_odometry.update(Rotation2d.fromDegrees(getHeading()), ctreUnitsToDistanceMeters(m_front_left.getSelectedSensorPosition()), ctreUnitsToDistanceMeters(m_front_right.getSelectedSensorPosition()));
+    m_odometry.update(simGyro.getHeading(), ctreUnitsToDistanceMeters(m_front_left.getSelectedSensorPosition()), ctreUnitsToDistanceMeters(m_front_right.getSelectedSensorPosition()));
     m_field.setRobotPose(m_odometry.getPoseMeters());
   }
 
@@ -93,9 +94,7 @@ public class Drivetrain extends SubsystemBase {
     m_leftSim.setQuadratureVelocity((int)velocityToCTRENativeUnits(m_driveSim.getLeftVelocityMetersPerSecond()));
     m_rightSim.setQuadratureRawPosition((int)distanceToCTRENativeUnits(m_driveSim.getRightPositionMeters()));
     m_rightSim.setQuadratureVelocity((int)velocityToCTRENativeUnits(m_driveSim.getRightVelocityMetersPerSecond()));
-    int dev = SimDeviceDataJNI.getSimDeviceHandle("navX-Sensor[0]");
-    SimDouble angle = new SimDouble(SimDeviceDataJNI.getSimValueHandle(dev, "Yaw"));
-    angle.set(m_driveSim.getHeading().getDegrees());
+    simGyro.setHeading(m_driveSim.getHeading());
 
     SmartDashboard.putNumber("DriveSim Angle Value", m_driveSim.getHeading().getDegrees());
     SmartDashboard.putNumber("NavX Value", m_navx.getAngle());
@@ -110,7 +109,7 @@ public class Drivetrain extends SubsystemBase {
   }
 
   public double ctreUnitsToDistanceMeters(double sensorCounts) {
-    double motorRotations = (double) sensorCounts / 2048; //Encoder CPR
+    double motorRotations = sensorCounts / 2048; //Encoder CPR
     double wheelRotations = motorRotations * Constants.kDrivetrainGearing;
     double positionMeters = wheelRotations * (Math.PI * Constants.kWheelDiameter);
     return positionMeters;
