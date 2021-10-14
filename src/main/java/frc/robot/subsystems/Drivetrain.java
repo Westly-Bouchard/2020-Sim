@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.TalonSRXSimCollection;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 import com.kauailabs.navx.frc.AHRS;
@@ -49,6 +50,17 @@ public class Drivetrain extends SubsystemBase {
 
   /** Creates a new Drivetrain. */
   public Drivetrain() {
+
+    m_front_left.setNeutralMode(NeutralMode.Brake);
+    m_front_right.setNeutralMode(NeutralMode.Brake);
+    m_back_left.setNeutralMode(NeutralMode.Brake);
+    m_back_right.setNeutralMode(NeutralMode.Brake);
+
+    m_back_left.setInverted(true);
+    m_front_left.setInverted(true);
+    m_back_right.setInverted(true);
+    m_front_right.setInverted(true);
+
     m_drive.setRightSideInverted(false);
     m_odometry = new DifferentialDriveOdometry(Rotation2d.fromDegrees(getHeading()));
 
@@ -69,7 +81,7 @@ public class Drivetrain extends SubsystemBase {
 
   @Override
   public void periodic() {
-    m_odometry.update(Rotation2d.fromDegrees(getHeading()), m_front_left.getSelectedSensorPosition(), m_front_right.getSelectedSensorPosition());
+    m_odometry.update(Rotation2d.fromDegrees(getHeading()), ctreUnitsToDistanceMeters(m_front_left.getSelectedSensorPosition()), ctreUnitsToDistanceMeters(m_front_right.getSelectedSensorPosition()));
     m_field.setRobotPose(m_odometry.getPoseMeters());
   }
 
@@ -84,6 +96,9 @@ public class Drivetrain extends SubsystemBase {
     int dev = SimDeviceDataJNI.getSimDeviceHandle("navX-Sensor[0]");
     SimDouble angle = new SimDouble(SimDeviceDataJNI.getSimValueHandle(dev, "Yaw"));
     angle.set(m_driveSim.getHeading().getDegrees());
+
+    SmartDashboard.putNumber("DriveSim Angle Value", m_driveSim.getHeading().getDegrees());
+    SmartDashboard.putNumber("NavX Value", m_navx.getAngle());
   }
 
   public void tankDrive(double left, double right) {
@@ -96,21 +111,21 @@ public class Drivetrain extends SubsystemBase {
 
   public double ctreUnitsToDistanceMeters(double sensorCounts) {
     double motorRotations = (double) sensorCounts / 2048; //Encoder CPR
-    double wheelRotations = motorRotations / Constants.kDrivetrainGearing;
+    double wheelRotations = motorRotations * Constants.kDrivetrainGearing;
     double positionMeters = wheelRotations * (Math.PI * Constants.kWheelDiameter);
     return positionMeters;
   }
 
   public double distanceToCTRENativeUnits(double positionMeters) {
     double wheelRotations = positionMeters / (Math.PI * Constants.kWheelDiameter);
-    double motorRotations = wheelRotations * Constants.kDrivetrainGearing;
+    double motorRotations = wheelRotations / Constants.kDrivetrainGearing;
     double sensorCounts = (motorRotations * 2048); // Encoder CPR
     return sensorCounts;
   }
 
   public double velocityToCTRENativeUnits(double velocityMetersPerSecond) {
     double wheelRotationsPerSecond = velocityMetersPerSecond / (Math.PI * Constants.kWheelDiameter);
-    double motorRotationsPerSecond = wheelRotationsPerSecond * Constants.kDrivetrainGearing;
+    double motorRotationsPerSecond = wheelRotationsPerSecond / Constants.kDrivetrainGearing;
     double motorRotationsPer100ms = motorRotationsPerSecond / 10;
     double sensorCountsPer100ms = (motorRotationsPer100ms * 2048); //Encoder CPR
     return sensorCountsPer100ms;
