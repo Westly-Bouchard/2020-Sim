@@ -8,7 +8,8 @@ import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.commands.looped.*;
+import edu.wpi.first.wpilibj2.command.RunCommand;
+import frc.robot.commands.looped.TankDrive;
 import frc.robot.subsystems.Drivetrain;
 
 /**
@@ -21,14 +22,20 @@ public class RobotContainer {
   // The robot's subsystems and commands are defined here...
   private final Drivetrain m_drivetrain = new Drivetrain();
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
-//  Joystick m_driverController = new Joystick(0);
   XboxController driveController = new XboxController(0);
-
 
   public RobotContainer() {
     // Configure the button bindings
     configureButtonBindings();
-    m_drivetrain.setDefaultCommand(new TankDrive(m_drivetrain, () -> driveController.getRawAxis(1), () -> driveController.getRawAxis(5), false));
+
+//    m_drivetrain.setDefaultCommand(new TankDrive(m_drivetrain, () -> driveController.getRawAxis(1), () -> driveController.getRawAxis(5), false));
+    m_drivetrain.setDefaultCommand(
+            new RunCommand(
+                    () ->
+                            m_drivetrain.tankDrive(driveController.getRawAxis(1), driveController.getRawAxis(5)),
+                    m_drivetrain
+            )
+    );
   }
 
   /**

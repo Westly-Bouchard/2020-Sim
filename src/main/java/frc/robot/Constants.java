@@ -20,7 +20,7 @@ public final class Constants {
 
     public static final double kDrivetrainGearing = (11.0/62) * (24.0/54) * 1.057;
     public static final int kRobotMass = 57;
-    public static final int kWheelDiameter = 6; //Inches
+    public static final double kWheelDiameter = 0.1524; //meters
     public static final double kMomentOfInertia = 3; //jKgMetersSquared
     public static final double kTrackWidth = 0.60658;
 

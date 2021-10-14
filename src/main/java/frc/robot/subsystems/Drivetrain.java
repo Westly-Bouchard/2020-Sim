@@ -4,10 +4,8 @@
 
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.motorcontrol.TalonSRXSimCollection;
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonFX;
 import com.kauailabs.navx.frc.AHRS;
-import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
@@ -24,6 +22,8 @@ import edu.wpi.first.wpilibj.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.GyroSim;
 import frc.robot.Constants;
+
+import java.util.Random;
 
 import static java.lang.Math.abs;
 import static java.lang.Math.sqrt;
@@ -48,7 +48,6 @@ public class Drivetrain extends SubsystemBase {
   private EncoderSim m_leftSim;
   private EncoderSim m_rightSim;
   private Field2d m_field;
-
   /** Creates a new Drivetrain. */
   public Drivetrain() {
     m_drive.setRightSideInverted(false);
@@ -117,7 +116,5 @@ public class Drivetrain extends SubsystemBase {
     m_rightSim.setDistance(m_driveSim.getRightPositionMeters());
     m_rightSim.setRate(m_driveSim.getRightVelocityMetersPerSecond());
     m_gyroSim.setHeading(m_driveSim.getHeading());
-    SmartDashboard.putNumber("SimX", m_driveSim.getPose().getX());
-    SmartDashboard.putNumber("SImY", m_driveSim.getPose().getY());
   }
 }
